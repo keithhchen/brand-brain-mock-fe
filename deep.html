@@ -235,6 +235,127 @@
         color: #2d3748;
         border: 1px solid rgba(226, 232, 240, 0.8);
         border-bottom-left-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .thinking-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 0;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeInUp 0.3s ease forwards;
+      }
+
+      .thinking-step:not(:last-child) {
+        margin-bottom: 16px;
+      }
+
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .thinking-step:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .thinking-step:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .thinking-step:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .thinking-step:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+
+      .step-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+      }
+
+      .step-icon svg {
+        width: 16px;
+        height: 16px;
+        stroke-width: 1.5;
+      }
+
+      .step-icon.thought {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .step-icon.action {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .step-icon.data {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .step-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .step-label {
+        font-weight: 500;
+        font-size: 12px;
+        margin-bottom: 6px;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .step-text {
+        font-size: 14px;
+        color: #111827;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .data-source-tag {
+        display: inline-flex;
+        align-items: center;
+        background: #f3f4f6;
+        color: #6b7280;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-top: 8px;
+        font-weight: 500;
+      }
+
+      .content-section {
+        margin-top: 8px;
+        padding: 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .content-section ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .content-section li {
+        margin-bottom: 8px;
       }
 
       .typing-indicator {
@@ -576,47 +697,141 @@
       </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <script>
-      const chatMessages = document.getElementById("chatMessages");
-      const chatInput = document.getElementById("chatInput");
-      const sendButton = document.getElementById("sendButton");
-      const typingIndicator = document.getElementById("typingIndicator");
+      const chatMessages = document.querySelector(".chat-messages");
+      const chatInput = document.querySelector(".chat-input");
+      const sendButton = document.querySelector(".send-button");
+      const typingIndicator = document.querySelector(".typing-indicator");
+
+      // 存储响应数据
+      let responses = {};
+
+      // 加载YAML响应数据
+      async function loadResponses() {
+        try {
+          const response = await fetch("mock_responses.yml");
+          const yamlText = await response.text();
+          const yamlData = jsyaml.load(yamlText);
+
+          // 将所有类别的响应合并到一个对象中
+          responses = {};
+          Object.values(yamlData.responses).forEach((category) => {
+            category.forEach((item) => {
+              responses[item.question] = {
+                thought: item.thought,
+                action: item.action,
+                data_source: item.data_source,
+                content: item.content.replace(/\n/g, "<br>"),
+              };
+            });
+          });
+
+          // 添加问题建议到启发列表
+          const inspirationList = document.querySelector(".inspiration-list");
+          inspirationList.innerHTML = ""; // 清空现有内容
+          Object.keys(responses).forEach((question) => {
+            const item = document.createElement("div");
+            item.className = "inspiration-item";
+            item.innerHTML = `
+              <div class="inspiration-title">${question}</div>
+              <div class="inspiration-desc">点击查看详细分析</div>
+            `;
+            item.addEventListener("click", () => {
+              chatInput.value = question;
+              sendMessage();
+            });
+            inspirationList.appendChild(item);
+          });
+        } catch (error) {
+          console.error("加载响应数据失败:", error);
+        }
+      }
+
+      // 在页面加载时加载响应数据
+      loadResponses();
 
       // 发送消息
-      function sendMessage() {
+      async function sendMessage() {
         const message = chatInput.value.trim();
         if (!message) return;
 
+        // 添加用户消息
         addMessage("user", message);
         chatInput.value = "";
+
+        // 显示打字指示器
         showTypingIndicator();
 
-        // 模拟AI回复
-        setTimeout(() => {
+        // 检查是否有对应的响应
+        if (!responses[message]) {
           hideTypingIndicator();
-          generateAIResponse(message);
-        }, 1500 + Math.random() * 1000);
+          addMessage(
+            "assistant",
+            "抱歉，我还不知道如何回答这个问题。请尝试从左侧选择一个问题。"
+          );
+          return;
+        }
+
+        // 生成AI回复
+        await generateAIResponse(message);
       }
 
-      // 快速操作
-      function sendQuickMessage(message) {
-        addMessage("user", message);
-        showTypingIndicator();
-
-        setTimeout(() => {
-          hideTypingIndicator();
-          generateAIResponse(message);
-        }, 1500 + Math.random() * 1000);
-      }
-
-      // 添加消息
-      function addMessage(sender, content) {
+      // 添加消息到聊天界面
+      function addMessage(type, content) {
         const messageDiv = document.createElement("div");
-        messageDiv.className = `message ${sender}`;
-        messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+        messageDiv.className = `message ${type}`;
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "message-content";
 
+        if (typeof content === "string") {
+          contentDiv.textContent = content;
+        } else {
+          contentDiv.innerHTML = content;
+        }
+
+        messageDiv.appendChild(contentDiv);
         chatMessages.insertBefore(messageDiv, typingIndicator);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 打字机效果
+      async function typeWriter(element, text, speed = 50) {
+        const words = text.split(" ");
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i];
+          if (i > 0) {
+            element.innerHTML += " ";
+            await new Promise((resolve) => setTimeout(resolve, speed));
+          }
+          element.innerHTML += word;
+          await new Promise((resolve) => setTimeout(resolve, speed));
+        }
+      }
+
+      // 逐步显示思考步骤
+      async function showThinkingStep(stepElement, delay = 300) {
+        stepElement.style.opacity = "0";
+        stepElement.style.transform = "translateY(10px)";
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        stepElement.style.opacity = "1";
+        stepElement.style.transform = "translateY(0)";
+      }
+
+      // 创建思考步骤元素
+      function createThinkingStep(iconSvg, label, thoughts) {
+        const stepDiv = document.createElement("div");
+        stepDiv.className = "thinking-step";
+        stepDiv.innerHTML = `
+          <div class="step-icon ${label.toLowerCase()}">
+            ${iconSvg}
+          </div>
+          <div class="step-content">
+            <div class="step-label">${label}</div>
+            <div class="step-text"></div>
+          </div>
+        `;
+        return stepDiv;
       }
 
       // 显示打字指示器
@@ -631,24 +846,111 @@
       }
 
       // 生成AI回复
-      function generateAIResponse(userMessage) {
-        const responses = {
-          分析宠物主的消费心理: `基于最新的消费者研究，我们发现：<br><br>1. 健康意识提升：<br>• 90%的宠主更关注配方和原料<br>• 愿意为功能性产品支付溢价<br><br>2. 购买决策因素：<br>• 品牌信任度（35%）<br>• 产品功效（28%）<br>• 价格（20%）<br>• 便利性（17%）<br><br>3. 信息获取渠道：<br>• 社交媒体（45%）<br>• 宠物医生推荐（30%）<br>• 品牌官方（25%）`,
+      async function generateAIResponse(userMessage) {
+        // 创建消息容器
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message assistant";
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "message-content";
+        messageDiv.appendChild(contentDiv);
+        chatMessages.insertBefore(messageDiv, typingIndicator);
 
-          分析高端主粮市场机会: `高端主粮市场分析：<br><br>1. 市场规模：<br>• 年增长率35%<br>• 预计2024年达到280亿规模<br><br>2. 增长驱动：<br>• 宠物医疗意识提升<br>• 消费升级趋势持续<br>• 新兴消费群体崛起<br><br>3. 机会点：<br>• 功能性主粮细分<br>• 天然无谷配方<br>• 定制化营养方案`,
+        const response = responses[userMessage];
 
-          如何提升品牌差异化: `品牌差异化策略建议：<br><br>1. 产品维度：<br>• 开发专利配方<br>• 强化功能性卖点<br>• 优化产品包装设计<br><br>2. 服务维度：<br>• 提供营养咨询服务<br>• 建立会员权益体系<br>• 打造社群运营模式<br><br>3. 营销维度：<br>• 强化专业形象传播<br>• 深化品牌情感连接<br>• 创新内容营销方式`,
+        // 创建并显示思考步骤
+        const thoughtStep = createThinkingStep(
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M9.25 12a2.75 2.75 0 1 1 5.5 0 2.75 2.75 0 0 1-5.5 0z"/>
+            <path d="M12 19.25V15"/>
+            <path d="M12 9V4.75"/>
+            <path d="M18.25 12H15"/>
+            <path d="M9 12H4.75"/>
+          </svg>`,
+          "Thought Process"
+        );
+        contentDiv.appendChild(thoughtStep);
+        await showThinkingStep(thoughtStep);
 
-          功能性主粮的创新方向: `功能性主粮创新方向：<br><br>1. 产品创新：<br>• 肠道健康配方<br>• 免疫力提升配方<br>• 关节护理配方<br>• 皮毛护理配方<br><br>2. 技术创新：<br>• 营养成分精准投放<br>• 适口性提升技术<br>• 保质期延长技术<br><br>3. 包装创新：<br>• 智能剂量设计<br>• 环保材质应用<br>• 便携包装设计`,
+        // 逐个显示思考内容
+        const thoughtText = thoughtStep.querySelector(".step-text");
+        for (let i = 0; i < response.thought.length; i++) {
+          if (i > 0) {
+            thoughtText.innerHTML += "<br>• ";
+          }
+          await typeWriter(
+            thoughtText,
+            (i === 0 ? "" : "") + response.thought[i]
+          );
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
 
-          如何优化全渠道策略: `全渠道优化策略：<br><br>1. 线上渠道：<br>• 天猫旗舰店升级<br>• 抖音短视频矩阵<br>• 小红书种草阵地<br><br>2. 线下渠道：<br>• 宠物医院渠道<br>• 精品宠物店渠道<br>• 体验店建设<br><br>3. 私域运营：<br>• 会员体系搭建<br>• 社群精细运营<br>• 个性化服务体系`,
-        };
+        // 创建并显示行动步骤
+        const actionStep = createThinkingStep(
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M20 12a8 8 0 1 0-16 0"/>
+            <path d="M12 4v8"/>
+            <path d="m9 10 3 2 3-2"/>
+          </svg>`,
+          "Action Taken"
+        );
+        contentDiv.appendChild(actionStep);
+        await showThinkingStep(actionStep);
 
-        // 根据用户问题生成回复
-        let response =
-          responses[userMessage] ||
-          "我理解您的问题，让我为您分析一下具体情况...";
-        addMessage("assistant", response);
+        // 逐个显示行动内容
+        const actionText = actionStep.querySelector(".step-text");
+        for (let i = 0; i < response.action.length; i++) {
+          if (i > 0) {
+            actionText.innerHTML += "<br>• ";
+          }
+          await typeWriter(
+            actionText,
+            (i === 0 ? "" : "") + response.action[i]
+          );
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
+
+        // 创建并显示数据源
+        const dataStep = createThinkingStep(
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 4v16m-8-8h16"/>
+          </svg>`,
+          "Data Source"
+        );
+        contentDiv.appendChild(dataStep);
+        await showThinkingStep(dataStep);
+
+        // 逐个显示数据源内容
+        const dataText = dataStep.querySelector(".step-text");
+        for (let i = 0; i < response.data_source.length; i++) {
+          if (i > 0) {
+            dataText.innerHTML += "<br>• ";
+          }
+          await typeWriter(
+            dataText,
+            (i === 0 ? "" : "") + response.data_source[i]
+          );
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
+        dataText.innerHTML += '<div class="data-source-tag">来源</div>';
+
+        // 创建并显示内容部分
+        const contentStep = document.createElement("div");
+        contentStep.className = "thinking-step";
+        contentStep.innerHTML = `
+          <div class="step-content">
+            <div class="content-section">
+              ${response.content}
+            </div>
+          </div>
+        `;
+        contentDiv.appendChild(contentStep);
+        await showThinkingStep(contentStep);
+
+        // 隐藏打字指示器
+        hideTypingIndicator();
+
+        // 滚动到底部
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
       // 输入框事件处理
