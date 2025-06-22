@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>品牌大脑 AI 助手</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .body-wrapper {
+        /* padding-top: 30px; */
+        height: 100vh;
+        display: grid;
+        padding: 0 32px;
+      }
+
+      .page-title {
+        color: white;
+        padding: 32px 24px 0 32px;
+      }
+
+      .page-title h1 {
+        font-size: 26px;
+        font-weight: bold;
+      }
+
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        /* height: 100vh; */
+        /* max-width: 1400px; */
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        /* margin: 20px; */
+        /* height: 95vh; */
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      /* 主要内容区域 */
+      .content-container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* 左侧数据面板 */
+      .data-panel {
+        width: 350px;
+        background: rgba(255, 255, 255, 0.95);
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 32px 24px 24px 32px;
+        padding-top: 32px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(103, 126, 234, 0.5) rgba(0, 0, 0, 0.1);
+      }
+
+      .data-panel::-webkit-scrollbar {
+        width: 6px;
+        background: transparent;
+      }
+
+      .data-panel::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .data-panel::-webkit-scrollbar-thumb {
+        background: rgba(103, 126, 234, 0.5);
+        border-radius: 3px;
+        transition: background 0.3s ease;
+      }
+
+      .data-panel::-webkit-scrollbar-thumb:hover {
+        background: rgba(103, 126, 234, 0.7);
+      }
+
+      .data-panel:hover::-webkit-scrollbar-thumb {
+        background: rgba(103, 126, 234, 0.5);
+      }
+
+      .data-panel h2,
+      .middle-panel-title,
+      .dashboard-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2d3748;
+        padding: 0 0 8px 0;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 1px;
+      }
+
+      .data-sources-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .data-source {
+        background: rgb(196 196 196 / 10%);
+        /* border: 1px solid rgba(103, 126, 234, 0.3); */
+        border-radius: 12px;
+        padding: 14px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .data-source:hover {
+        background: rgba(103, 126, 234, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .data-source.active {
+        background: rgba(103, 126, 234, 0.3);
+        border-color: #667eea;
+      }
+
+      .data-source-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .data-source-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #718096;
+      }
+
+      .data-source-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .data-source-meta .update-time {
+        color: #667eea;
+      }
+
+      .dashboard-panel {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .metric-card {
+        background: rgba(103, 126, 234, 0.1);
+        border-radius: 8px;
+        padding: 12px;
+      }
+
+      .metric-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+
+      .metric-label {
+        font-size: 11px;
+        color: #718096;
+      }
+
+      .chart-container {
+        height: 150px;
+        margin-top: 12px;
+        position: relative;
+      }
+
+      .chart-bar {
+        position: absolute;
+        bottom: 0;
+        width: 8%;
+        background: linear-gradient(to top, #667eea, #764ba2);
+        border-radius: 4px 4px 0 0;
+        transition: height 0.3s ease;
+      }
+
+      .chart-label {
+        position: absolute;
+        bottom: -20px;
+        font-size: 10px;
+        color: #718096;
+        text-align: center;
+        width: 8%;
+      }
+
+      .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+      }
+
+      .trend-up {
+        background: rgba(72, 187, 120, 0.1);
+        color: #2f855a;
+      }
+
+      .trend-down {
+        background: rgba(245, 101, 101, 0.1);
+        color: #c53030;
+      }
+
+      /* 右侧聊天区域 */
+      .chat-container {
+        width: 350px;
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.98);
+        border-top-left-radius: 12px;
+      }
+
+      .chat-header {
+        padding: 32px 24px 20px 32px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+      }
+
+      .chat-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+
+      .chat-subtitle {
+        font-size: 14px;
+        color: #718096;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.98),
+          rgba(249, 250, 251, 0.98)
+        );
+      }
+
+      .message {
+        margin-bottom: 24px;
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.user {
+        text-align: right;
+      }
+
+      .message.assistant {
+        text-align: left;
+      }
+
+      .message-content {
+        display: inline-block;
+        max-width: 70%;
+        padding: 16px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .message.user .message-content {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-bottom-right-radius: 8px;
+      }
+
+      .message.assistant .message-content {
+        background: rgba(247, 250, 252, 0.9);
+        color: #2d3748;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-bottom-left-radius: 8px;
+      }
+
+      .typing-indicator {
+        display: none;
+        padding: 16px 20px;
+        background: rgba(247, 250, 252, 0.9);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        border-bottom-left-radius: 8px;
+        max-width: 70%;
+      }
+
+      .typing-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #cbd5e0;
+        animation: typing 1.5s infinite;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typing {
+        0%,
+        60%,
+        100% {
+          transform: scale(0.8);
+          opacity: 0.5;
+        }
+        30% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .chat-input-container {
+        padding: 20px 24px 32px 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+      }
+
+      .chat-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+      }
+
+      .chat-input {
+        flex: 1;
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 14px 20px;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        max-height: 120px;
+        min-height: 48px;
+      }
+
+      .chat-input:focus {
+        border-color: #667eea;
+        background: white;
+      }
+
+      .send-button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        height: 48px;
+      }
+
+      .send-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+      }
+
+      .send-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .quick-action {
+        background: rgba(103, 126, 234, 0.1);
+        border: 1px solid rgba(103, 126, 234, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 12px;
+        color: #667eea;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .quick-action:hover {
+        background: rgba(103, 126, 234, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .data-insights {
+        background: rgba(52, 211, 153, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        margin-top: 0;
+      }
+
+      .insights-title {
+        font-weight: 600;
+        color: #065f46;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .insights-content {
+        font-size: 13px;
+        color: #047857;
+        line-height: 1.4;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        .main-container {
+          margin: 0;
+          border-radius: 0;
+          height: 100vh;
+        }
+
+        .data-panel {
+          display: none;
+        }
+      }
+
+      .llm-tool-pill {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(103, 126, 234, 0.12);
+        border: 1px solid rgba(103, 126, 234, 0.25);
+        border-radius: 16px;
+        padding: 4px 12px;
+        font-size: 13px;
+        color: #667eea;
+        margin-bottom: 8px;
+        margin-right: 8px;
+        gap: 6px;
+        font-family: inherit;
+      }
+      .llm-tool-pill svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.8;
+      }
+      .llm-tool-status {
+        color: #a0aec0;
+        font-size: 13px;
+        margin-bottom: 8px;
+        margin-left: 2px;
+      }
+
+      .middle-panel {
+        flex: 1;
+        min-width: 220px;
+        background: rgba(255, 255, 255, 0.93);
+        border-right: 1px solid rgba(230, 230, 250, 0.25);
+        border-left: 1px solid rgba(230, 230, 250, 0.18);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 32px 32px 0 32px;
+        gap: 18px;
+        box-shadow: 0 0 0 0 #fff;
+      }
+      .middle-panel-title {
+        /* unified above */
+      }
+      .output-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 8px;
+      }
+      .output-card {
+        background: #f7f8fa;
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(103, 126, 234, 0.06);
+        padding: 22px 18px 18px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        cursor: pointer;
+        transition: box-shadow 0.18s, background 0.18s;
+        border: 1.5px solid transparent;
+      }
+      .output-card:hover {
+        background: #eef1fa;
+        box-shadow: 0 6px 24px rgba(103, 126, 234, 0.13);
+        border: 1.5px solid #667eea33;
+      }
+      .output-card-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 10px;
+        color: #667eea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .output-card-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+      .output-card-subtext {
+        font-size: 12px;
+        color: #718096;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="body-wrapper">
+      <div class="page-title">
+        <h1>品牌大脑</h1>
+      </div>
+      <div class="main-container">
+        <!-- 主要内容区域 -->
+        <div class="content-container">
+          <!-- 左侧数据面板 -->
+          <div class="data-panel">
+            <h2>数据</h2>
+            <div class="data-sources-grid">
+              <div
+                class="data-source active"
+                onclick="selectDataSource(this, 'trend')"
+              >
+                <div class="data-source-title">品牌趋势分析</div>
+                <div class="data-source-meta">
+                  <span>2.3K+ 零售品牌</span>
+                  <span class="update-time">今天</span>
+                </div>
+              </div>
+
+              <div class="data-source" onclick="selectDataSource(this, 'sku')">
+                <div class="data-source-title">SKU投放效果</div>
+                <div class="data-source-meta">
+                  <span>12 个SKU</span>
+                  <span class="update-time">2小时前</span>
+                </div>
+              </div>
+
+              <div
+                class="data-source"
+                onclick="selectDataSource(this, 'content')"
+              >
+                <div class="data-source-title">内容链路分析</div>
+                <div class="data-source-meta">
+                  <span>890K+ 内容</span>
+                  <span class="update-time">实时</span>
+                </div>
+              </div>
+
+              <div
+                class="data-source"
+                onclick="selectDataSource(this, 'sentiment')"
+              >
+                <div class="data-source-title">用户语言洞察</div>
+                <div class="data-source-meta">
+                  <span>1.2M+ 评论</span>
+                  <span class="update-time">30分钟前</span>
+                </div>
+              </div>
+
+              <div
+                class="data-source"
+                onclick="selectDataSource(this, 'personality')"
+              >
+                <div class="data-source-title">品牌人格</div>
+                <div class="data-source-meta">
+                  <span>动态更新</span>
+                  <span class="update-time">1小时前</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-panel">
+              <div class="dashboard-title">数据概览</div>
+              <div class="data-insights">
+                <div class="insights-title">实时洞察</div>
+                <div class="insights-content">
+                  高端主粮市场增长+35%，无谷物配方需求显著提升，功能性主粮（如肠胃调理、美毛）成为新增长点。
+                </div>
+              </div>
+              <div class="metric-grid">
+                <div class="metric-card">
+                  <div class="metric-value" id="metric1">--</div>
+                  <div class="metric-label" id="metric1Label">--</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value" id="metric2">--</div>
+                  <div class="metric-label" id="metric2Label">--</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value" id="metric3">--</div>
+                  <div class="metric-label" id="metric3Label">--</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value" id="metric4">--</div>
+                  <div class="metric-label" id="metric4Label">--</div>
+                </div>
+              </div>
+              <div class="chart-container" id="chartContainer">
+                <!-- Chart bars will be inserted here by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 中间输出类型面板 -->
+          <div class="middle-panel">
+            <div class="middle-panel-title">执行</div>
+            <div class="output-grid">
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="5" y="7" width="18" height="14" rx="3" />
+                    <path d="M9 11h10M9 15h6" />
+                  </svg>
+                </div>
+                <div class="output-card-label">月度报告</div>
+                <div class="output-card-subtext">
+                  综合本月外部环境、品牌表现生成的 Agent 洞察
+                </div>
+              </div>
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="9" cy="14" r="4" />
+                    <circle cx="19" cy="14" r="4" />
+                    <path d="M13 14h2" />
+                  </svg>
+                </div>
+                <div class="output-card-label">竞品对比</div>
+                <div class="output-card-subtext">对比主要竞品表现</div>
+              </div>
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M7 17c2-2 6-2 8 0m-8 0c2-2 6-2 8 0m-8 0V9a5 5 0 0 1 10 0v8"
+                    />
+                  </svg>
+                </div>
+                <div class="output-card-label">用户洞察</div>
+                <div class="output-card-subtext">洞察宠物主需求与反馈</div>
+              </div>
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M4 18V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12" />
+                    <rect x="4" y="18" width="16" height="4" rx="2" />
+                  </svg>
+                </div>
+                <div class="output-card-label">市场趋势</div>
+                <div class="output-card-subtext">追踪主粮市场动态</div>
+              </div>
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="14" cy="14" r="10" />
+                    <path d="M14 8v6l4 2" />
+                  </svg>
+                </div>
+                <div class="output-card-label">品牌健康度</div>
+                <div class="output-card-subtext">监测品牌声量与口碑</div>
+              </div>
+              <div class="output-card">
+                <div class="output-card-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="6" y="6" width="16" height="16" rx="4" />
+                    <path d="M10 10h8v8h-8z" />
+                  </svg>
+                </div>
+                <div class="output-card-label">新品策略</div>
+                <div class="output-card-subtext">
+                  Agent 基于品牌人格和业务表现生成的策略
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧聊天区域 -->
+          <div class="chat-container">
+            <div class="chat-header">
+              <div class="chat-title">AI 助手</div>
+              <div class="chat-subtitle">品牌人格 · 智能分析 · 策略决策</div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+              <div class="message assistant">
+                <div class="message-content">
+                  您好！我是您的品牌大脑。我可以帮您分析市场趋势、优化产品策略、解读消费者洞察。请问您想了解什么？
+                </div>
+              </div>
+
+              <div class="quick-actions">
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('分析我的主粮品牌本月表现')"
+                >
+                  分析我的主粮品牌本月表现
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('哪些主粮SKU投放效果最好？')"
+                >
+                  哪些主粮SKU投放效果最好？
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('最近宠物主评论有什么变化？')"
+                >
+                  最近宠物主评论有什么变化？
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('帮我分析竞品主粮策略')"
+                >
+                  帮我分析竞品主粮策略
+                </div>
+              </div>
+
+              <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-input-container">
+              <div class="chat-input-wrapper">
+                <textarea
+                  class="chat-input"
+                  id="chatInput"
+                  placeholder="请提问，回答基于品牌大脑..."
+                  rows="1"
+                ></textarea>
+                <button
+                  class="send-button"
+                  id="sendButton"
+                  onclick="sendMessage()"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="m22 2-7 20-4-9-9-4 20-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentDataSource = "trend";
+      const chatMessages = document.getElementById("chatMessages");
+      const chatInput = document.getElementById("chatInput");
+      const sendButton = document.getElementById("sendButton");
+      const typingIndicator = document.getElementById("typingIndicator");
+
+      // 数据源选择
+      function selectDataSource(element, source) {
+        document
+          .querySelectorAll(".data-source")
+          .forEach((el) => el.classList.remove("active"));
+        element.classList.add("active");
+        currentDataSource = source;
+
+        const sourceNames = {
+          trend: "品牌趋势分析",
+          sku: "SKU投放效果",
+          content: "内容链路分析",
+          sentiment: "用户语言洞察",
+          personality: "品牌人格",
+        };
+
+        updateDashboard(source);
+        addMessage(
+          "assistant",
+          `已切换到 ${sourceNames[source]} 数据源，您可以针对这个维度提问了。`
+        );
+      }
+
+      // 更新仪表板数据
+      function updateDashboard(source) {
+        const dashboardData = {
+          trend: {
+            metrics: [
+              { value: "¥3.2M", label: "本月销售额", trend: "+25.5%" },
+              { value: "18.5%", label: "市场份额", trend: "+3.1%" },
+              { value: "86", label: "活跃SKU数", trend: "+15" },
+              { value: "298", label: "平均客单价", trend: "+45" },
+            ],
+            chartData: [65, 72, 68, 75, 82, 78, 85],
+          },
+          sku: {
+            metrics: [
+              { value: "3.8", label: "平均ROI", trend: "+0.6" },
+              { value: "¥1.5M", label: "周投放额", trend: "+25%" },
+              { value: "92%", label: "转化率", trend: "+8%" },
+              { value: "3.2", label: "点击率", trend: "+0.5" },
+            ],
+            chartData: [45, 52, 48, 55, 62, 58, 65],
+          },
+          content: {
+            metrics: [
+              { value: "2.5K", label: "内容数", trend: "+256" },
+              { value: "5.8%", label: "互动率", trend: "+1.2%" },
+              { value: "3.2", label: "平均点赞", trend: "+0.6" },
+              { value: "92%", label: "内容质量", trend: "+15%" },
+            ],
+            chartData: [35, 42, 38, 45, 52, 48, 55],
+          },
+          sentiment: {
+            metrics: [
+              { value: "85%", label: "正面评价", trend: "+8%" },
+              { value: "3.5K", label: "评论数", trend: "+256" },
+              { value: "4.6", label: "平均评分", trend: "+0.4" },
+              { value: "92%", label: "情感准确率", trend: "+3%" },
+            ],
+            chartData: [55, 62, 58, 65, 72, 68, 75],
+          },
+          personality: {
+            metrics: [
+              { value: "88%", label: "人格一致性", trend: "+10%" },
+              { value: "4.9", label: "品牌温度", trend: "+0.4" },
+              { value: "94%", label: "用户认同度", trend: "+6%" },
+              { value: "3.8", label: "差异化指数", trend: "+0.5" },
+            ],
+            chartData: [75, 82, 78, 85, 92, 88, 95],
+          },
+        };
+
+        const data = dashboardData[source];
+
+        // 更新指标
+        for (let i = 0; i < 4; i++) {
+          const metric = data.metrics[i];
+          document.getElementById(`metric${i + 1}`).innerHTML = `${
+            metric.value
+          }<span class="trend-indicator ${
+            metric.trend.startsWith("+") ? "trend-up" : "trend-down"
+          }">${metric.trend}</span>`;
+          document.getElementById(`metric${i + 1}Label`).textContent =
+            metric.label;
+        }
+
+        // 更新图表
+        const chartContainer = document.getElementById("chartContainer");
+        chartContainer.innerHTML = "";
+
+        const maxValue = Math.max(...data.chartData);
+        data.chartData.forEach((value, index) => {
+          const bar = document.createElement("div");
+          bar.className = "chart-bar";
+          bar.style.left = `${index * 12}%`;
+          bar.style.height = `${(value / maxValue) * 100}%`;
+
+          const label = document.createElement("div");
+          label.className = "chart-label";
+          label.style.left = `${index * 12}%`;
+          label.textContent = `D${index + 1}`;
+
+          chartContainer.appendChild(bar);
+          chartContainer.appendChild(label);
+        });
+      }
+
+      // 发送消息
+      function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        addMessage("user", message);
+        chatInput.value = "";
+        showTypingIndicator();
+
+        // 模拟LLM工具调用（仅演示）
+        if (/数据|分析|报告/.test(message)) {
+          addLLMToolPill(`
+            <div class="llm-tool-pill">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              正在分析宠物主粮市场数据
+            </div>
+            <div class="llm-tool-pill">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/><path d="M6 10h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              正在搜索宠物主粮用户评论
+            </div>
+            <div class="llm-tool-status">正在生成分析报告...</div>
+          `);
+        }
+
+        // 模拟AI回复
+        setTimeout(() => {
+          hideTypingIndicator();
+          generateAIResponse(message);
+        }, 1500 + Math.random() * 1000);
+      }
+
+      // 快速操作
+      function sendQuickMessage(message) {
+        addMessage("user", message);
+        showTypingIndicator();
+
+        // 模拟LLM工具调用（仅演示）
+        if (/数据|分析|报告/.test(message)) {
+          addLLMToolPill(`
+            <div class="llm-tool-pill">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              正在分析宠物主粮市场数据
+            </div>
+            <div class="llm-tool-pill">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/><path d="M6 10h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              正在搜索宠物主粮用户评论
+            </div>
+            <div class="llm-tool-status">正在生成分析报告...</div>
+          `);
+        }
+
+        setTimeout(() => {
+          hideTypingIndicator();
+          generateAIResponse(message);
+        }, 1500 + Math.random() * 1000);
+      }
+
+      // 添加消息
+      function addMessage(sender, content) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+
+        chatMessages.insertBefore(messageDiv, typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // LLM工具使用提示
+      function addLLMToolPill(html) {
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        chatMessages.insertBefore(div, typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 显示打字指示器
+      function showTypingIndicator() {
+        typingIndicator.style.display = "block";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 隐藏打字指示器
+      function hideTypingIndicator() {
+        typingIndicator.style.display = "none";
+      }
+
+      // 生成AI回复
+      function generateAIResponse(userMessage) {
+        const responses = {
+          trend: {
+            分析我的主粮品牌本月销售表现: `<strong>主粮品牌销售表现分析</strong><br><br>本月整体表现：<br>• 销售额同比增长 +25.5%<br>• 主力价格带集中在 200-400元区间<br>• 天猫平台占比58%，抖音电商占比28%<br><br><strong>策略建议：</strong><br>建议加大300-500元价格带产品投入，该区间增长潜力较大，特别是功能性主粮产品。`,
+
+            竞品策略分析: `<strong>主粮竞品策略对比</strong><br><br>主要竞争对手分析：<br>• 品牌A：重点布局小红书+抖音，KOL策略为主<br>• 品牌B：传统电商平台深耕，价格战略明显<br>• 品牌C：新品迭代频繁，功能性主粮为主<br><br><strong>差异化机会：</strong><br>建议在B站和知乎平台加大投入，竞品覆盖相对较少，可重点推广专业营养知识。`,
+          },
+
+          sku: {
+            "哪些主粮SKU投放效果最好？": `<strong>高效主粮SKU投放排行</strong><br><br>TOP 3 表现SKU：<br>1. 【无谷物成犬粮】ROI 3.8，周投入15万<br>2. 【美毛配方幼犬粮】ROI 3.2，周投入12万<br>3. 【肠胃调理成犬粮】ROI 3.0，周投入18万<br><br><strong>优化建议：</strong><br>无谷物系列可适当加大投入，美毛配方建议扩大投放平台覆盖。`,
+
+            分析我的主粮品牌本月销售表现: `<strong>SKU维度销售分析</strong><br><br>本月SKU表现概览：<br>• 活跃SKU数量：86个<br>• 平均ROI：2.8（行业平均2.2）<br>• 头部SKU（Top 10）贡献82%销售额<br>• 功能性主粮SKU转化率显著提升<br><br><strong>优化方向：</strong><br>建议调整长尾SKU投放预算，集中资源在功能性主粮产品。`,
+          },
+
+          content: {
+            "最近宠物主评论有什么变化？": `<strong>用户评论趋势分析</strong><br><br>最近7天内容表现：<br>• 种草笔记互动率 +18%<br>• 产品测评类内容表现最佳<br>• "适口性"、"营养均衡"提及频次上升<br>• 负面评论主要集中在包装和储存<br><br><strong>内容策略建议：</strong><br>加大测评类内容投入，优化产品包装和储存说明。`,
+
+            分析我的主粮品牌本月销售表现: `<strong>内容链路销售分析</strong><br><br>本月内容投放效果：<br>• 总投放内容：2,547条<br>• 平均单条内容ROI：1.8<br>• 小红书种草→天猫转化链路最佳<br>• 短视频内容比图文内容转化高35%<br><br><strong>内容优化方向：</strong><br>建议增加短视频内容比例，特别是产品使用场景和宠物食用效果展示。`,
+          },
+
+          sentiment: {
+            "最近宠物主评论有什么变化？": `<strong>用户语言洞察报告</strong><br><br>情感分析结果：<br>• 正面情感占比：85%（↑8%）<br>• 高频好评词：["适口性好", "营养均衡", "性价比高"]<br>• 新增关注点：原料来源、储存方式<br>• 用户更关注产品专业性和安全性<br><br><strong>品牌调性建议：</strong><br>可以加强原料溯源和产品安全性的传播，迎合用户关注点变化。`,
+
+            竞品策略分析: `<strong>品牌语言对比分析</strong><br><br>品牌调性差异：<br>• 我方：专业、可靠、性价比<br>• 竞品A：高端、精致、时尚<br>• 竞品B：传统、稳重、历史感<br><br>用户感知差异：<br>• 我方在"性价比"维度领先<br>• 在"高端感"维度有提升空间<br><br><strong>优化方向：</strong><br>保持性价比优势，适当增加高端化表达。`,
+          },
+
+          personality: {
+            分析品牌人格: `<strong>品牌人格分析报告</strong><br><br>当前品牌人格特征：<br>• 专业可靠（88%匹配度）<br>• 温暖亲和（82%匹配度）<br>• 创新活力（70%匹配度）<br>• 高端品质（85%匹配度）<br><br><strong>用户感知：</strong><br>• 品牌温度评分：4.9/5<br>• 用户认同度：94%<br>• 差异化指数：3.8/5<br><br><strong>优化建议：</strong><br>建议加强创新活力的表达，平衡专业与亲和力的展现。`,
+
+            竞品策略分析: `<strong>品牌人格对比分析</strong><br><br>人格维度对比：<br>• 专业度：我方领先12%<br>• 亲和力：竞品A领先10%<br>• 创新性：竞品B领先8%<br>• 品质感：我方领先6%<br><br><strong>差异化建议：</strong><br>保持专业可靠的核心优势，适当增加创新活力的表达，提升品牌温度。`,
+          },
+        };
+
+        // 根据当前数据源和用户问题生成回复
+        let response = "🤖 正在分析您的问题...";
+
+        if (responses[currentDataSource]) {
+          for (const key in responses[currentDataSource]) {
+            if (
+              userMessage.includes(key) ||
+              key.includes(userMessage.substring(0, 10))
+            ) {
+              response = responses[currentDataSource][key];
+              break;
+            }
+          }
+        }
+
+        // 如果没有匹配的预设回复，生成通用回复
+        if (response === "🤖 正在分析您的问题...") {
+          const genericResponses = [
+            `基于${
+              currentDataSource === "trend"
+                ? "品牌趋势"
+                : currentDataSource === "sku"
+                ? "SKU投放"
+                : currentDataSource === "content"
+                ? "内容链路"
+                : "用户语言"
+            }数据分析，我为您找到了以下洞察：<br><br>• 数据显示该领域存在明显增长机会<br>• 建议关注关键指标的变化趋势<br>• 可以考虑优化当前策略配置<br><br>💡 您可以提供更具体的品牌或产品信息，我将给出更精准的分析。`,
+
+            `根据最新的数据分析结果：<br><br>📈 当前表现超出行业平均水平<br>🎯 存在进一步优化的空间<br>💰 ROI提升潜力较大<br><br>建议您提供具体的品牌名称或产品信息，我可以给出更详细的策略建议。`,
+
+            `我已经调取了相关数据进行分析：<br><br>✨ 发现了几个值得关注的趋势<br>🔍 识别出潜在的优化机会<br>📊 整理了对比基准数据<br><br>如果您能提供更多背景信息，比如具体的品牌名称、产品类目或时间范围，我可以提供更精准的洞察。`,
+          ];
+
+          response =
+            genericResponses[
+              Math.floor(Math.random() * genericResponses.length)
+            ];
+        }
+
+        addMessage("assistant", response);
+      }
+
+      // 输入框事件处理
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // 输入框自动调整高度
+      chatInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+
+      // 初始化
+      document.addEventListener("DOMContentLoaded", function () {
+        chatInput.focus();
+        updateDashboard("trend"); // 默认显示趋势数据
+      });
+    </script>
+  </body>
+</html>

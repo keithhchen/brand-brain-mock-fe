@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>品牌大脑 AI 助手</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .body-wrapper {
+        /* padding-top: 30px; */
+        height: 100vh;
+        display: grid;
+        padding: 0 32px;
+      }
+
+      .page-title {
+        color: white;
+        padding: 32px 24px 0 32px;
+      }
+
+      .page-title h1 {
+        font-size: 26px;
+        font-weight: bold;
+      }
+
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        /* height: 100vh; */
+        /* max-width: 1400px; */
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        /* margin: 20px; */
+        /* height: 95vh; */
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      /* 主要内容区域 */
+      .content-container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* 左侧数据面板 */
+      .data-panel {
+        width: 350px;
+        background: rgba(255, 255, 255, 0.95);
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 32px 24px 24px 32px;
+        padding-top: 32px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(103, 126, 234, 0.5) rgba(0, 0, 0, 0.1);
+      }
+
+      .data-panel::-webkit-scrollbar {
+        width: 6px;
+        background: transparent;
+      }
+
+      .data-panel::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .data-panel::-webkit-scrollbar-thumb {
+        background: rgba(103, 126, 234, 0.5);
+        border-radius: 3px;
+        transition: background 0.3s ease;
+      }
+
+      .data-panel::-webkit-scrollbar-thumb:hover {
+        background: rgba(103, 126, 234, 0.7);
+      }
+
+      .data-panel:hover::-webkit-scrollbar-thumb {
+        background: rgba(103, 126, 234, 0.5);
+      }
+
+      .data-panel h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2d3748;
+        padding: 0 0 8px 0;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 1px;
+      }
+
+      .inspiration-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .inspiration-item {
+        background: rgba(103, 126, 234, 0.08);
+        border: 1px solid rgba(103, 126, 234, 0.15);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .inspiration-item:hover {
+        background: rgba(103, 126, 234, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .inspiration-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+
+      .inspiration-desc {
+        color: #718096;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .inspiration-tag {
+        display: inline-block;
+        background: rgba(103, 126, 234, 0.1);
+        color: #667eea;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+
+      /* 右侧聊天区域 */
+      .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.98);
+        border-top-left-radius: 12px;
+      }
+
+      .chat-header {
+        padding: 32px 24px 20px 32px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+      }
+
+      .chat-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+
+      .chat-subtitle {
+        font-size: 14px;
+        color: #718096;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.98),
+          rgba(249, 250, 251, 0.98)
+        );
+      }
+
+      .message {
+        margin-bottom: 24px;
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.user {
+        text-align: right;
+      }
+
+      .message.assistant {
+        text-align: left;
+      }
+
+      .message-content {
+        display: inline-block;
+        max-width: 70%;
+        padding: 16px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .message.user .message-content {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-bottom-right-radius: 8px;
+      }
+
+      .message.assistant .message-content {
+        background: rgba(247, 250, 252, 0.9);
+        color: #2d3748;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-bottom-left-radius: 8px;
+      }
+
+      .typing-indicator {
+        display: none;
+        padding: 16px 20px;
+        background: rgba(247, 250, 252, 0.9);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        border-bottom-left-radius: 8px;
+        max-width: 70%;
+      }
+
+      .typing-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #cbd5e0;
+        animation: typing 1.5s infinite;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typing {
+        0%,
+        60%,
+        100% {
+          transform: scale(0.8);
+          opacity: 0.5;
+        }
+        30% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .chat-input-container {
+        padding: 20px 24px 32px 24px;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+      }
+
+      .chat-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+      }
+
+      .chat-input {
+        flex: 1;
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 14px 20px;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        max-height: 120px;
+        min-height: 48px;
+      }
+
+      .chat-input:focus {
+        border-color: #667eea;
+        background: white;
+      }
+
+      .send-button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        height: 48px;
+      }
+
+      .send-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+      }
+
+      .send-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .quick-action {
+        background: rgba(103, 126, 234, 0.1);
+        border: 1px solid rgba(103, 126, 234, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 12px;
+        color: #667eea;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .quick-action:hover {
+        background: rgba(103, 126, 234, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .data-insights {
+        background: rgba(52, 211, 153, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 16px 0;
+        margin-top: 0;
+      }
+
+      .insights-title {
+        font-weight: 600;
+        color: #065f46;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .insights-content {
+        font-size: 13px;
+        color: #047857;
+        line-height: 1.4;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        .main-container {
+          margin: 0;
+          border-radius: 0;
+          height: 100vh;
+        }
+
+        .data-panel {
+          display: none;
+        }
+      }
+
+      .llm-tool-pill {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(103, 126, 234, 0.12);
+        border: 1px solid rgba(103, 126, 234, 0.25);
+        border-radius: 16px;
+        padding: 4px 12px;
+        font-size: 13px;
+        color: #667eea;
+        margin-bottom: 8px;
+        margin-right: 8px;
+        gap: 6px;
+        font-family: inherit;
+      }
+      .llm-tool-pill svg {
+        width: 16px;
+        height: 16px;
+        opacity: 0.8;
+      }
+      .llm-tool-status {
+        color: #a0aec0;
+        font-size: 13px;
+        margin-bottom: 8px;
+        margin-left: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="body-wrapper">
+      <div class="page-title">
+        <h1>品牌大脑</h1>
+      </div>
+      <div class="main-container">
+        <!-- 主要内容区域 -->
+        <div class="content-container">
+          <!-- 左侧灵感面板 -->
+          <div class="data-panel">
+            <h2>灵感</h2>
+            <div class="inspiration-list">
+              <div
+                class="inspiration-item"
+                onclick="sendQuickMessage('分析宠物主的消费心理')"
+              >
+                <div class="inspiration-title">消费者洞察</div>
+                <div class="inspiration-desc">
+                  探索宠物主的消费决策过程，了解他们的核心需求和痛点。
+                </div>
+                <span class="inspiration-tag">消费者研究</span>
+              </div>
+
+              <div
+                class="inspiration-item"
+                onclick="sendQuickMessage('分析高端主粮市场机会')"
+              >
+                <div class="inspiration-title">市场机会</div>
+                <div class="inspiration-desc">
+                  高端主粮市场增长迅速，探索产品创新和市场定位机会。
+                </div>
+                <span class="inspiration-tag">市场分析</span>
+              </div>
+
+              <div
+                class="inspiration-item"
+                onclick="sendQuickMessage('如何提升品牌差异化')"
+              >
+                <div class="inspiration-title">品牌策略</div>
+                <div class="inspiration-desc">
+                  在竞争激烈的市场中，打造独特的品牌价值主张。
+                </div>
+                <span class="inspiration-tag">品牌建设</span>
+              </div>
+
+              <div
+                class="inspiration-item"
+                onclick="sendQuickMessage('功能性主粮的创新方向')"
+              >
+                <div class="inspiration-title">产品创新</div>
+                <div class="inspiration-desc">
+                  探索功能性主粮的创新机会，满足细分市场需求。
+                </div>
+                <span class="inspiration-tag">产品研发</span>
+              </div>
+
+              <div
+                class="inspiration-item"
+                onclick="sendQuickMessage('如何优化全渠道策略')"
+              >
+                <div class="inspiration-title">渠道策略</div>
+                <div class="inspiration-desc">
+                  构建高效的全渠道销售网络，提升品牌触达和转化。
+                </div>
+                <span class="inspiration-tag">渠道优化</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧聊天区域 -->
+          <div class="chat-container">
+            <div class="chat-header">
+              <div class="chat-title">AI 助手</div>
+              <div class="chat-subtitle">品牌人格 · 智能分析 · 策略决策</div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+              <div class="message assistant">
+                <div class="message-content">
+                  您好！我是您的品牌大脑。我可以帮您分析市场趋势、优化产品策略、解读消费者洞察。请问您想了解什么？
+                </div>
+              </div>
+
+              <div class="quick-actions">
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('分析我的主粮品牌本月表现')"
+                >
+                  分析我的主粮品牌本月表现
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('哪些主粮SKU投放效果最好？')"
+                >
+                  哪些主粮SKU投放效果最好？
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('最近宠物主评论有什么变化？')"
+                >
+                  最近宠物主评论有什么变化？
+                </div>
+                <div
+                  class="quick-action"
+                  onclick="sendQuickMessage('帮我分析竞品主粮策略')"
+                >
+                  帮我分析竞品主粮策略
+                </div>
+              </div>
+
+              <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                  <div class="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-input-container">
+              <div class="chat-input-wrapper">
+                <textarea
+                  class="chat-input"
+                  id="chatInput"
+                  placeholder="请提问，回答基于品牌大脑..."
+                  rows="1"
+                ></textarea>
+                <button
+                  class="send-button"
+                  id="sendButton"
+                  onclick="sendMessage()"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="m22 2-7 20-4-9-9-4 20-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chatMessages = document.getElementById("chatMessages");
+      const chatInput = document.getElementById("chatInput");
+      const sendButton = document.getElementById("sendButton");
+      const typingIndicator = document.getElementById("typingIndicator");
+
+      // 发送消息
+      function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        addMessage("user", message);
+        chatInput.value = "";
+        showTypingIndicator();
+
+        // 模拟AI回复
+        setTimeout(() => {
+          hideTypingIndicator();
+          generateAIResponse(message);
+        }, 1500 + Math.random() * 1000);
+      }
+
+      // 快速操作
+      function sendQuickMessage(message) {
+        addMessage("user", message);
+        showTypingIndicator();
+
+        setTimeout(() => {
+          hideTypingIndicator();
+          generateAIResponse(message);
+        }, 1500 + Math.random() * 1000);
+      }
+
+      // 添加消息
+      function addMessage(sender, content) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+        messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+
+        chatMessages.insertBefore(messageDiv, typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 显示打字指示器
+      function showTypingIndicator() {
+        typingIndicator.style.display = "block";
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 隐藏打字指示器
+      function hideTypingIndicator() {
+        typingIndicator.style.display = "none";
+      }
+
+      // 生成AI回复
+      function generateAIResponse(userMessage) {
+        const responses = {
+          分析宠物主的消费心理: `基于最新的消费者研究，我们发现：<br><br>1. 健康意识提升：<br>• 90%的宠主更关注配方和原料<br>• 愿意为功能性产品支付溢价<br><br>2. 购买决策因素：<br>• 品牌信任度（35%）<br>• 产品功效（28%）<br>• 价格（20%）<br>• 便利性（17%）<br><br>3. 信息获取渠道：<br>• 社交媒体（45%）<br>• 宠物医生推荐（30%）<br>• 品牌官方（25%）`,
+
+          分析高端主粮市场机会: `高端主粮市场分析：<br><br>1. 市场规模：<br>• 年增长率35%<br>• 预计2024年达到280亿规模<br><br>2. 增长驱动：<br>• 宠物医疗意识提升<br>• 消费升级趋势持续<br>• 新兴消费群体崛起<br><br>3. 机会点：<br>• 功能性主粮细分<br>• 天然无谷配方<br>• 定制化营养方案`,
+
+          如何提升品牌差异化: `品牌差异化策略建议：<br><br>1. 产品维度：<br>• 开发专利配方<br>• 强化功能性卖点<br>• 优化产品包装设计<br><br>2. 服务维度：<br>• 提供营养咨询服务<br>• 建立会员权益体系<br>• 打造社群运营模式<br><br>3. 营销维度：<br>• 强化专业形象传播<br>• 深化品牌情感连接<br>• 创新内容营销方式`,
+
+          功能性主粮的创新方向: `功能性主粮创新方向：<br><br>1. 产品创新：<br>• 肠道健康配方<br>• 免疫力提升配方<br>• 关节护理配方<br>• 皮毛护理配方<br><br>2. 技术创新：<br>• 营养成分精准投放<br>• 适口性提升技术<br>• 保质期延长技术<br><br>3. 包装创新：<br>• 智能剂量设计<br>• 环保材质应用<br>• 便携包装设计`,
+
+          如何优化全渠道策略: `全渠道优化策略：<br><br>1. 线上渠道：<br>• 天猫旗舰店升级<br>• 抖音短视频矩阵<br>• 小红书种草阵地<br><br>2. 线下渠道：<br>• 宠物医院渠道<br>• 精品宠物店渠道<br>• 体验店建设<br><br>3. 私域运营：<br>• 会员体系搭建<br>• 社群精细运营<br>• 个性化服务体系`,
+        };
+
+        // 根据用户问题生成回复
+        let response =
+          responses[userMessage] ||
+          "我理解您的问题，让我为您分析一下具体情况...";
+        addMessage("assistant", response);
+      }
+
+      // 输入框事件处理
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // 输入框自动调整高度
+      chatInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+
+      // 初始化
+      document.addEventListener("DOMContentLoaded", function () {
+        chatInput.focus();
+      });
+    </script>
+  </body>
+</html>
