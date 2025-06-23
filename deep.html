@@ -766,10 +766,7 @@
         // 检查是否有对应的响应
         if (!responses[message]) {
           hideTypingIndicator();
-          addMessage(
-            "assistant",
-            "抱歉，我还不知道如何回答这个问题。请尝试从左侧选择一个问题。"
-          );
+          addMessage("assistant", "抱歉，我还不知道如何回答这个问题。");
           return;
         }
 
