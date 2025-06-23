@@ -8,7 +8,7 @@ const ChatContainer = ({ responses }) => {
     const [messages, setMessages] = useState([
         {
             type: 'assistant',
-            content: '您好！我是您的品牌大脑。我可以帮您分析市场趋势、优化产品策略、解读消费者洞察。请问您想了解什么？'
+            response: '您好！我是您的品牌大脑。我可以帮您分析市场趋势、优化产品策略、解读消费者洞察。请问您想了解什么？'
         }
     ]);
     const [isTyping, setIsTyping] = useState(false);
@@ -24,7 +24,7 @@ const ChatContainer = ({ responses }) => {
         // Add user message
         const userMessage = {
             type: 'user',
-            content: messageText
+            question: messageText
         };
         setMessages(prev => [...prev, userMessage]);
 
@@ -36,7 +36,7 @@ const ChatContainer = ({ responses }) => {
             setIsTyping(false);
             setMessages(prev => [...prev, {
                 type: 'assistant',
-                content: '抱歉，我还不知道如何回答这个问题。请尝试从左侧选择一个问题。'
+                response: '抱歉，我还不知道如何回答这个问题。请尝试从左侧选择一个问题。'
             }]);
             return;
         }
@@ -50,7 +50,7 @@ const ChatContainer = ({ responses }) => {
             thought: response.thought,
             action: response.action,
             data_source: response.data_source,
-            content: response.content
+            response: response.response
         };
 
         setIsTyping(false);

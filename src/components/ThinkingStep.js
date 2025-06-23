@@ -4,6 +4,17 @@ import './ThinkingStep.css';
 const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSourceTag = false }) => {
     if (!show || !items || items.length === 0) return null;
 
+    const renderActionTags = (item) => {
+        if (!item.tool) return null;
+        return (
+            <div className="action-tags">
+                <span className="action-tag tool">{item.tool}</span>
+                <span className="action-tag scope">{item.scope}</span>
+                <span className="action-tag count">{item.count}</span>
+            </div>
+        );
+    };
+
     return (
         <div className="thinking-step">
             <div className="step-header">
@@ -22,12 +33,16 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSou
                             opacity: show ? 1 : 0,
                         }}
                     >
-                        {showSourceTag && item.source && (
-                            <span className="source-tag">{item.source}</span>
+                        {showSourceTag && (
+                            <span className="source-tag">{item}</span>
                         )}
-                        <div className="item-content">
-                            {typeof item === 'string' ? item : item.content}
-                        </div>
+                        {item.tool ? (
+                            renderActionTags(item)
+                        ) : (
+                            <div className="item-content">
+                                {typeof item === 'string' ? item : item.content}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

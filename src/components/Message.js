@@ -48,7 +48,7 @@ const Message = ({ message }) => {
             return () => {
                 clearTimeout(contentTimer);
             };
-        } else if (message.type === 'assistant' && message.content) {
+        } else if (message.type === 'assistant' && message.response) {
             // If no thinking steps, show content immediately
             setShowContent(true);
         }
@@ -58,7 +58,7 @@ const Message = ({ message }) => {
         return (
             <div className="message user">
                 <div className="message-content">
-                    {message.content}
+                    {message.question}
                 </div>
             </div>
         );
@@ -71,7 +71,7 @@ const Message = ({ message }) => {
                     <ThinkingStep
                         iconSvg={<Sparkles size={20} strokeWidth={1} />}
                         label="思考"
-                        items={message.thought}
+                        items={[message.thought]}
                         show={showThinkingSteps.thought}
                         isThinking={true}
                     />
@@ -93,12 +93,11 @@ const Message = ({ message }) => {
                         label="数据来源"
                         items={message.data_source}
                         show={showThinkingSteps.data_source}
-                        showSourceTag={true}
                         isThinking={true}
                     />
                 )}
 
-                {message.content && showContent && (
+                {message.response && showContent && (
                     <div className="thinking-step">
                         <div className="answer-content">
                             <div className="content-section">
@@ -117,7 +116,7 @@ const Message = ({ message }) => {
                                         )
                                     }}
                                 >
-                                    {message.content}
+                                    {message.response}
                                 </ReactMarkdown>
                             </div>
                         </div>

@@ -219,7 +219,6 @@ body {
 }
 
 .thinking-step {
-  margin: 8px 0;
   font-size: 14px;
   opacity: 0;
   transform: translateY(10px);

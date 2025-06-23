@@ -2,17 +2,24 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ChatContainer from './components/ChatContainer';
 import DataPanel from './components/DataPanel';
-import { loadResponses } from './utils/yamlLoader';
 
 function App() {
     const [responses, setResponses] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const initializeApp = async () => {
+        const fetchResponses = async () => {
             try {
-                const responseData = await loadResponses();
-                setResponses(responseData);
+                const response = await fetch('/mock_responses.json');
+                const data = await response.json();
+
+                // Convert array to question-keyed object for easier lookup
+                const responsesMap = {};
+                data.forEach(item => {
+                    responsesMap[item.question] = item;
+                });
+
+                setResponses(responsesMap);
             } catch (error) {
                 console.error('Failed to load responses:', error);
             } finally {
@@ -20,7 +27,7 @@ function App() {
             }
         };
 
-        initializeApp();
+        fetchResponses();
     }, []);
 
     if (loading) {
