@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import ThinkingStep from './ThinkingStep';
 import { Sparkles, Search, Database } from 'lucide-react';
 
@@ -99,10 +101,25 @@ const Message = ({ message }) => {
                 {message.content && showContent && (
                     <div className="thinking-step">
                         <div className="answer-content">
-                            <div
-                                className="content-section"
-                                dangerouslySetInnerHTML={{ __html: message.content }}
-                            />
+                            <div className="content-section">
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        // Override default link rendering to open in new tab
+                                        a: ({ node, children, ...props }) => (
+                                            <a target="_blank" rel="noopener noreferrer" {...props}>
+                                                {children}
+                                            </a>
+                                        ),
+                                        // Ensure code blocks are properly styled
+                                        code: ({ node, inline, ...props }) => (
+                                            <code className={inline ? 'inline-code' : 'code-block'} {...props} />
+                                        )
+                                    }}
+                                >
+                                    {message.content}
+                                </ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 )}
