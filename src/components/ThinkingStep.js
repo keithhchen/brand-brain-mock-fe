@@ -25,17 +25,15 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false }) => {
             return (
                 <div className="data-source-links">
                     {lines.map((line, lineIndex) => (
-                        <a
+                        <button
                             key={lineIndex}
-                            href="#"
                             className="data-source-link"
-                            onClick={(e) => e.preventDefault()}
                             style={{
                                 animationDelay: `${baseDelay + (lineIndex * 150)}ms`,
                             }}
                         >
                             {line.trim()}
-                        </a>
+                        </button>
                     ))}
                 </div>
             );
