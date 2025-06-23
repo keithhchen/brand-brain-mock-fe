@@ -4,7 +4,8 @@
   animation: fadeIn 0.5s ease-in forwards;
 }
 
-.thinking-step:not(:nth-last-child(-n + 2))::after {
+/* First two components get solid lines */
+.thinking-step:nth-child(-n + 2)::after {
   content: "";
   position: absolute;
   top: 28px;
@@ -14,18 +15,24 @@
   background: rgba(203, 213, 224, 0.8);
 }
 
-.thinking-step:nth-last-child(2)::after {
+/* Third component gets gradient line */
+.thinking-step:nth-child(3)::after {
   content: "";
   position: absolute;
   top: 28px;
   left: 10px;
   width: 1px;
-  height: calc(100% - 5px);
+  height: calc(100% - 20px);
   background: linear-gradient(
     to bottom,
     rgba(203, 213, 224, 0.8) 50%,
     rgba(203, 213, 224, 0.2)
   );
+}
+
+/* Remove any lines from next-steps section */
+.thinking-step.next-steps::after {
+  display: none;
 }
 
 .step-header {

@@ -50,7 +50,8 @@ const ChatContainer = ({ responses, onNewMessage }) => {
             thought: response.thought,
             action: response.action,
             data_source: response.data_source,
-            response: response.response
+            response: response.response,
+            next_steps: response.next_steps
         };
 
         setIsTyping(false);

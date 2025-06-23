@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ThinkingStep from './ThinkingStep';
+// import { Sparkles, Search, Database, ListChecks } from 'lucide-react';
 import { Sparkles, Search, Database } from 'lucide-react';
 
 const Message = ({ message }) => {
@@ -83,6 +84,22 @@ const Message = ({ message }) => {
         );
     }
 
+    // For simple text responses, render without thinking steps
+    if (message.type === 'assistant' && !message.thought && !message.action && !message.data_source) {
+        return (
+            <div className="message assistant">
+                <div className="message-content">
+                    <div className="content-section">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.response}
+                        </ReactMarkdown>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // For full answer objects, render with thinking steps
     return (
         <div className="message assistant">
             <div className="message-content">
@@ -138,6 +155,30 @@ const Message = ({ message }) => {
                                     {message.response}
                                 </ReactMarkdown>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {message.next_steps && message.next_steps.length > 0 && showContent && (
+                    <div className="thinking-step next-steps">
+                        <div className="step-header">
+                            {/* <div className="step-icon">
+                                <ListChecks size={20} strokeWidth={1} />
+                            </div> */}
+                            <div className="step-label">下一步</div>
+                        </div>
+                        <div className="next-steps-container">
+                            {message.next_steps.map((step, index) => (
+                                <button
+                                    key={index}
+                                    className="next-step-button"
+                                    style={{
+                                        animationDelay: `${index * 100}ms`
+                                    }}
+                                >
+                                    {step}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 )}
