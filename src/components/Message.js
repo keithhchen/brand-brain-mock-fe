@@ -61,6 +61,7 @@ const Message = ({ message }) => {
                         label="Thought Process"
                         items={message.thought}
                         show={showThinkingSteps}
+                        isThinking={true}
                     />
                 )}
 
@@ -76,6 +77,7 @@ const Message = ({ message }) => {
                         label="Action Taken"
                         items={message.action}
                         show={showThinkingSteps}
+                        isThinking={true}
                     />
                 )}
 
@@ -90,12 +92,13 @@ const Message = ({ message }) => {
                         items={message.data_source}
                         show={showThinkingSteps}
                         showSourceTag={true}
+                        isThinking={true}
                     />
                 )}
 
                 {message.content && showContent && (
                     <div className="thinking-step">
-                        <div className="step-content">
+                        <div className="answer-content">
                             <div
                                 className="content-section"
                                 dangerouslySetInnerHTML={{ __html: message.content }}

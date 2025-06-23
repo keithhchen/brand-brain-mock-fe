@@ -168,7 +168,7 @@ body {
 
 .chat-messages {
   flex: 1;
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
   background: linear-gradient(
     to bottom,
@@ -178,7 +178,7 @@ body {
 }
 
 .message {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   animation: fadeInUp 0.5s ease-out;
 }
 
@@ -204,8 +204,8 @@ body {
 .message-content {
   display: inline-block;
   max-width: 70%;
-  padding: 16px 20px;
-  border-radius: 20px;
+  padding: 12px 16px;
+  border-radius: 16px;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -223,13 +223,11 @@ body {
   border-bottom-left-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px;
+  padding: 16px 20px;
 }
 
 .thinking-step {
-  display: flex;
-  align-items: flex-start;
   gap: 12px;
   padding: 0;
   opacity: 0;
@@ -238,7 +236,7 @@ body {
 }
 
 .thinking-step:not(:last-child) {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 @keyframes fadeInUp {
@@ -327,8 +325,6 @@ body {
 }
 
 .content-section {
-  margin-top: 8px;
-  padding: 16px;
   background: #f9fafb;
   border-radius: 8px;
   font-size: 14px;

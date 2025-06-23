@@ -1,7 +1,7 @@
 import React from 'react';
 import './ThinkingStep.css';
 
-const ThinkingStep = ({ iconSvg, label, items, show, showSourceTag = false }) => {
+const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSourceTag = false }) => {
     if (!show || !items || items.length === 0) return null;
 
     return (
@@ -12,7 +12,7 @@ const ThinkingStep = ({ iconSvg, label, items, show, showSourceTag = false }) =>
                 </div>
                 <div className="step-label">{label}</div>
             </div>
-            <div className="step-content">
+            <div className={`${isThinking ? 'step-content' : 'answer-content'}`}>
                 {items.map((item, index) => (
                     <div
                         key={index}
