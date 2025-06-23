@@ -2,30 +2,47 @@ import React, { useState, useEffect } from 'react';
 import ThinkingStep from './ThinkingStep';
 
 const Message = ({ message }) => {
-    const [showThinkingSteps, setShowThinkingSteps] = useState(false);
+    const [showThinkingSteps, setShowThinkingSteps] = useState({
+        thought: false,
+        action: false,
+        data_source: false
+    });
     const [showContent, setShowContent] = useState(false);
 
     useEffect(() => {
         if (message.type === 'assistant' && (message.thought || message.action || message.data_source)) {
-            // Show thinking steps after a short delay
-            const timer = setTimeout(() => {
-                setShowThinkingSteps(true);
-            }, 500);
+            // Show thinking steps in sequence
+            const thoughtDelay = 500;
+            const stepDuration = 1000; // Time to show each step
 
-            // Calculate total animation time for thinking steps
-            const thoughtItems = message.thought ? message.thought.length : 0;
-            const actionItems = message.action ? message.action.length : 0;
-            const dataItems = message.data_source ? message.data_source.length : 0;
-            const totalItems = thoughtItems + actionItems + dataItems;
-            const totalAnimationTime = totalItems * 300 + 500; // 300ms per item + initial delay
+            // Show thought process first
+            if (message.thought) {
+                setTimeout(() => {
+                    setShowThinkingSteps(prev => ({ ...prev, thought: true }));
+                }, thoughtDelay);
+            }
 
-            // Show content after all thinking steps are complete
+            // Show action after thought
+            if (message.action) {
+                setTimeout(() => {
+                    setShowThinkingSteps(prev => ({ ...prev, action: true }));
+                }, thoughtDelay + stepDuration);
+            }
+
+            // Show data source after action
+            if (message.data_source) {
+                setTimeout(() => {
+                    setShowThinkingSteps(prev => ({ ...prev, data_source: true }));
+                }, thoughtDelay + (stepDuration * 2));
+            }
+
+            // Show final content after all steps
+            const totalSteps = [message.thought, message.action, message.data_source].filter(Boolean).length;
             const contentTimer = setTimeout(() => {
                 setShowContent(true);
-            }, totalAnimationTime);
+            }, thoughtDelay + (stepDuration * totalSteps));
 
             return () => {
-                clearTimeout(timer);
                 clearTimeout(contentTimer);
             };
         } else if (message.type === 'assistant' && message.content) {
@@ -60,7 +77,7 @@ const Message = ({ message }) => {
                         }
                         label="Thought Process"
                         items={message.thought}
-                        show={showThinkingSteps}
+                        show={showThinkingSteps.thought}
                         isThinking={true}
                     />
                 )}
@@ -76,7 +93,7 @@ const Message = ({ message }) => {
                         }
                         label="Action Taken"
                         items={message.action}
-                        show={showThinkingSteps}
+                        show={showThinkingSteps.action}
                         isThinking={true}
                     />
                 )}
@@ -90,7 +107,7 @@ const Message = ({ message }) => {
                         }
                         label="Data Source"
                         items={message.data_source}
-                        show={showThinkingSteps}
+                        show={showThinkingSteps.data_source}
                         showSourceTag={true}
                         isThinking={true}
                     />
