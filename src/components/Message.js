@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ThinkingStep from './ThinkingStep';
+import { Sparkles, Search, Database } from 'lucide-react';
 
 const Message = ({ message }) => {
     const [showThinkingSteps, setShowThinkingSteps] = useState({
@@ -66,16 +67,8 @@ const Message = ({ message }) => {
             <div className="message-content">
                 {message.thought && (
                     <ThinkingStep
-                        iconSvg={
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M9.25 12a2.75 2.75 0 1 1 5.5 0 2.75 2.75 0 0 1-5.5 0z" />
-                                <path d="M12 19.25V15" />
-                                <path d="M12 9V4.75" />
-                                <path d="M18.25 12H15" />
-                                <path d="M9 12H4.75" />
-                            </svg>
-                        }
-                        label="Thought Process"
+                        iconSvg={<Sparkles size={20} strokeWidth={1} />}
+                        label="思考"
                         items={message.thought}
                         show={showThinkingSteps.thought}
                         isThinking={true}
@@ -84,14 +77,8 @@ const Message = ({ message }) => {
 
                 {message.action && (
                     <ThinkingStep
-                        iconSvg={
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M20 12a8 8 0 1 0-16 0" />
-                                <path d="M12 4v8" />
-                                <path d="m9 10 3 2 3-2" />
-                            </svg>
-                        }
-                        label="Action Taken"
+                        iconSvg={<Search size={20} strokeWidth={1} />}
+                        label="工具调用"
                         items={message.action}
                         show={showThinkingSteps.action}
                         isThinking={true}
@@ -100,12 +87,8 @@ const Message = ({ message }) => {
 
                 {message.data_source && (
                     <ThinkingStep
-                        iconSvg={
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M12 4v16m-8-8h16" />
-                            </svg>
-                        }
-                        label="Data Source"
+                        iconSvg={<Database size={20} strokeWidth={1} />}
+                        label="数据来源"
                         items={message.data_source}
                         show={showThinkingSteps.data_source}
                         showSourceTag={true}

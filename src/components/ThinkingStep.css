@@ -64,8 +64,9 @@
 }
 
 .step-item {
-  margin: 6px 0;
+  margin: 0;
   position: relative;
+  font-size: 12px;
 }
 
 .source-tag {

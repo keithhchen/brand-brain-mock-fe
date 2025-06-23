@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { ArrowUp } from 'lucide-react';
 
 const ChatInput = ({ onSendMessage }) => {
     const [message, setMessage] = useState('');
@@ -45,16 +46,7 @@ const ChatInput = ({ onSendMessage }) => {
                     onClick={handleSend}
                     disabled={!message.trim()}
                 >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                    >
-                        <path d="m22 2-7 20-4-9-9-4 20-7z" />
-                    </svg>
+                    <ArrowUp size={20} strokeWidth={2} />
                 </button>
             </div>
         </div>
