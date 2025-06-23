@@ -15,19 +15,24 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false }) => {
         );
     };
 
-    const renderContent = (content, isDataSource = false) => {
+    const renderContent = (content, isDataSource = false, itemIndex = 0) => {
         if (typeof content !== 'string') return content;
 
+        const lines = content.split('\n');
+        const baseDelay = itemIndex * 300; // Base delay for each item
+
         if (isDataSource) {
-            const lines = content.split('\n');
             return (
                 <div className="data-source-links">
-                    {lines.map((line, index) => (
+                    {lines.map((line, lineIndex) => (
                         <a
-                            key={index}
+                            key={lineIndex}
                             href="#"
                             className="data-source-link"
                             onClick={(e) => e.preventDefault()}
+                            style={{
+                                animationDelay: `${baseDelay + (lineIndex * 150)}ms`,
+                            }}
                         >
                             {line.trim()}
                         </a>
@@ -36,7 +41,21 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false }) => {
             );
         }
 
-        return <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />;
+        return (
+            <div className="content-lines">
+                {lines.map((line, lineIndex) => (
+                    <div
+                        key={lineIndex}
+                        className="content-line"
+                        style={{
+                            animationDelay: `${baseDelay + (lineIndex * 150)}ms`,
+                        }}
+                    >
+                        {line}
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     return (
@@ -53,15 +72,16 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false }) => {
                         key={index}
                         className="step-item"
                         style={{
-                            animationDelay: `${index * 300}ms`,
                             opacity: show ? 1 : 0,
                         }}
                     >
                         {item.tool ? (
-                            renderActionTags(item)
+                            <div style={{ animationDelay: `${index * 300}ms` }} className="animate-in">
+                                {renderActionTags(item)}
+                            </div>
                         ) : (
                             <div className="item-content">
-                                {renderContent(typeof item === 'string' ? item : item.content, label === "数据来源")}
+                                {renderContent(typeof item === 'string' ? item : item.content, label === "数据来源", index)}
                             </div>
                         )}
                     </div>
