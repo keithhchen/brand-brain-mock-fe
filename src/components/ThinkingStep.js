@@ -1,55 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import './ThinkingStep.css';
 
 const ThinkingStep = ({ iconSvg, label, items, show, showSourceTag = false }) => {
-    const [displayedItems, setDisplayedItems] = useState([]);
-    const [isComplete, setIsComplete] = useState(false);
-
-    useEffect(() => {
-        if (show && items && items.length > 0) {
-            // Reset state when show becomes true
-            setDisplayedItems([]);
-            setIsComplete(false);
-
-            let currentIndex = 0;
-            const timer = setInterval(() => {
-                if (currentIndex < items.length) {
-                    setDisplayedItems(prevItems => [...prevItems, items[currentIndex]]);
-                    currentIndex++;
-                } else {
-                    clearInterval(timer);
-                    setIsComplete(true);
-                }
-            }, 300);
-
-            return () => clearInterval(timer);
-        }
-    }, [show, items]);
-
-    // Reset when items change
-    useEffect(() => {
-        setDisplayedItems([]);
-        setIsComplete(false);
-    }, [items]);
-
-    if (!show) return null;
+    if (!show || !items || items.length === 0) return null;
 
     return (
         <div className="thinking-step">
-            <div className={`step-icon ${label.toLowerCase().replace(' ', '')}`}>
-                {iconSvg}
+            <div className="step-header">
+                <div className="step-icon">
+                    {iconSvg}
+                </div>
+                <div className="step-label">{label}</div>
             </div>
             <div className="step-content">
-                <div className="step-label">{label}</div>
-                <div className="step-text">
-                    {displayedItems.map((item, index) => (
-                        <React.Fragment key={index}>
-                            {index > 0 && <br />}• {item}
-                        </React.Fragment>
-                    ))}
-                    {showSourceTag && isComplete && (
-                        <div className="data-source-tag">来源</div>
-                    )}
-                </div>
+                {items.map((item, index) => (
+                    <div
+                        key={index}
+                        className="step-item"
+                        style={{
+                            animationDelay: `${index * 300}ms`,
+                            opacity: show ? 1 : 0,
+                        }}
+                    >
+                        {showSourceTag && item.source && (
+                            <span className="source-tag">{item.source}</span>
+                        )}
+                        <div className="item-content">
+                            {typeof item === 'string' ? item : item.content}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
