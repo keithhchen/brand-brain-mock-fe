@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import ChatContainer from './components/ChatContainer';
 import DataPanel from './components/DataPanel';
+import { Monitor } from 'lucide-react';
+
+const MobileBlocker = () => (
+    <div className="mobile-blocker">
+        <Monitor size={48} strokeWidth={1} />
+        <h2>请在电脑端访问</h2>
+        <p>为了获得最佳体验，请使用桌面电脑访问本页面</p>
+    </div>
+);
 
 function App() {
     const [mockResponses, setMockResponses] = useState(null);
@@ -48,20 +57,23 @@ function App() {
     }
 
     return (
-        <div className="body-wrapper">
-            <div className="page-title">
-                <h1>品牌大脑</h1>
-            </div>
-            <div className="main-container">
-                <div className="content-container">
-                    <DataPanel responses={activeResponses} />
-                    <ChatContainer
-                        responses={mockResponses}
-                        onNewMessage={handleNewMessage}
-                    />
+        <>
+            <MobileBlocker />
+            <div className="body-wrapper">
+                <div className="page-title">
+                    <h1>品牌大脑</h1>
+                </div>
+                <div className="main-container">
+                    <div className="content-container">
+                        <DataPanel responses={activeResponses} />
+                        <ChatContainer
+                            responses={mockResponses}
+                            onNewMessage={handleNewMessage}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 
