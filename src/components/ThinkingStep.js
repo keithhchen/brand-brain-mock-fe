@@ -1,7 +1,7 @@
 import React from 'react';
 import './ThinkingStep.css';
 
-const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSourceTag = false }) => {
+const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false }) => {
     if (!show || !items || items.length === 0) return null;
 
     const renderActionTags = (item) => {
@@ -13,6 +13,30 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSou
                 <span className="action-tag count">{item.count}</span>
             </div>
         );
+    };
+
+    const renderContent = (content, isDataSource = false) => {
+        if (typeof content !== 'string') return content;
+
+        if (isDataSource) {
+            const lines = content.split('\n');
+            return (
+                <div className="data-source-links">
+                    {lines.map((line, index) => (
+                        <a
+                            key={index}
+                            href="#"
+                            className="data-source-link"
+                            onClick={(e) => e.preventDefault()}
+                        >
+                            {line.trim()}
+                        </a>
+                    ))}
+                </div>
+            );
+        }
+
+        return <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }} />;
     };
 
     return (
@@ -33,14 +57,11 @@ const ThinkingStep = ({ iconSvg, label, items, show, isThinking = false, showSou
                             opacity: show ? 1 : 0,
                         }}
                     >
-                        {showSourceTag && (
-                            <span className="source-tag">{item}</span>
-                        )}
                         {item.tool ? (
                             renderActionTags(item)
                         ) : (
                             <div className="item-content">
-                                {typeof item === 'string' ? item : item.content}
+                                {renderContent(typeof item === 'string' ? item : item.content, label === "数据来源")}
                             </div>
                         )}
                     </div>

@@ -12,6 +12,13 @@ const Message = ({ message }) => {
     });
     const [showContent, setShowContent] = useState(false);
 
+    const scrollToBottom = () => {
+        const chatMessages = document.querySelector('.chat-messages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    };
+
     useEffect(() => {
         if (message.type === 'assistant' && (message.thought || message.action || message.data_source)) {
             // Show thinking steps in sequence
@@ -22,6 +29,7 @@ const Message = ({ message }) => {
             if (message.thought) {
                 setTimeout(() => {
                     setShowThinkingSteps(prev => ({ ...prev, thought: true }));
+                    scrollToBottom();
                 }, thoughtDelay);
             }
 
@@ -29,6 +37,7 @@ const Message = ({ message }) => {
             if (message.action) {
                 setTimeout(() => {
                     setShowThinkingSteps(prev => ({ ...prev, action: true }));
+                    scrollToBottom();
                 }, thoughtDelay + stepDuration);
             }
 
@@ -36,6 +45,7 @@ const Message = ({ message }) => {
             if (message.data_source) {
                 setTimeout(() => {
                     setShowThinkingSteps(prev => ({ ...prev, data_source: true }));
+                    scrollToBottom();
                 }, thoughtDelay + (stepDuration * 2));
             }
 
@@ -43,6 +53,7 @@ const Message = ({ message }) => {
             const totalSteps = [message.thought, message.action, message.data_source].filter(Boolean).length;
             const contentTimer = setTimeout(() => {
                 setShowContent(true);
+                scrollToBottom();
             }, thoughtDelay + (stepDuration * totalSteps));
 
             return () => {
@@ -51,8 +62,16 @@ const Message = ({ message }) => {
         } else if (message.type === 'assistant' && message.response) {
             // If no thinking steps, show content immediately
             setShowContent(true);
+            scrollToBottom();
         }
     }, [message]);
+
+    // Scroll when user message appears
+    useEffect(() => {
+        if (message.type === 'user') {
+            scrollToBottom();
+        }
+    }, [message.type]);
 
     if (message.type === 'user') {
         return (

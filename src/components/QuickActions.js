@@ -2,10 +2,9 @@ import React from 'react';
 
 const QuickActions = ({ onActionClick }) => {
     const quickActions = [
-        '分析我的主粮品牌本月表现',
-        '哪些主粮SKU投放效果最好？',
-        '最近宠物主评论有什么变化？',
-        '帮我分析竞品主粮策略'
+        '与我品牌调性最匹配的 TOP10 达人是哪些？',
+        '有哪些平台上的评论正在影响我品牌认知？',
+        '我的商品最受欢迎的卖点是什么？',
     ];
 
     return (
