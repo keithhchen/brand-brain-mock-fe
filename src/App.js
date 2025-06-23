@@ -4,7 +4,8 @@ import ChatContainer from './components/ChatContainer';
 import DataPanel from './components/DataPanel';
 
 function App() {
-    const [responses, setResponses] = useState({});
+    const [mockResponses, setMockResponses] = useState(null);
+    const [activeResponses, setActiveResponses] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -19,7 +20,7 @@ function App() {
                     responsesMap[item.question] = item;
                 });
 
-                setResponses(responsesMap);
+                setMockResponses(responsesMap);
             } catch (error) {
                 console.error('Failed to load responses:', error);
             } finally {
@@ -29,6 +30,13 @@ function App() {
 
         fetchResponses();
     }, []);
+
+    const handleNewMessage = (question, response) => {
+        setActiveResponses(prev => ({
+            ...prev,
+            [question]: response
+        }));
+    };
 
     if (loading) {
         return (
@@ -46,8 +54,11 @@ function App() {
             </div>
             <div className="main-container">
                 <div className="content-container">
-                    <DataPanel responses={responses} />
-                    <ChatContainer responses={responses} />
+                    <DataPanel responses={activeResponses} />
+                    <ChatContainer
+                        responses={mockResponses}
+                        onNewMessage={handleNewMessage}
+                    />
                 </div>
             </div>
         </div>

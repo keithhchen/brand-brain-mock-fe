@@ -4,7 +4,7 @@ import TypingIndicator from './TypingIndicator';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
 
-const ChatContainer = ({ responses }) => {
+const ChatContainer = ({ responses, onNewMessage }) => {
     const [messages, setMessages] = useState([
         {
             type: 'assistant',
@@ -55,7 +55,10 @@ const ChatContainer = ({ responses }) => {
 
         setIsTyping(false);
         setMessages(prev => [...prev, assistantMessage]);
-    }, [responses]);
+
+        // Notify parent about the new message
+        onNewMessage(messageText, response);
+    }, [responses, onNewMessage]);
 
     useEffect(() => {
         scrollToBottom();
