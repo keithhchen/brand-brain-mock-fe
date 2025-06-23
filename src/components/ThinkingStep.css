@@ -1,6 +1,31 @@
 .thinking-step {
   margin: 8px 0;
   font-size: 14px;
+  position: relative;
+}
+
+.thinking-step:not(:nth-last-child(-n + 2))::after {
+  content: "";
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  width: 1px;
+  height: calc(100% + 0px);
+  background: rgba(203, 213, 224, 0.8);
+}
+
+.thinking-step:nth-last-child(2)::after {
+  content: "";
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  width: 1px;
+  height: calc(100% - 20px);
+  background: linear-gradient(
+    to bottom,
+    rgba(203, 213, 224, 0.8) 50%,
+    rgba(203, 213, 224, 0.2)
+  );
 }
 
 .step-header {
@@ -8,30 +33,37 @@
   align-items: center;
   margin-bottom: 8px;
   color: #666;
+  position: relative;
 }
 
 .step-icon {
   width: 20px;
   height: 20px;
   margin-right: 8px;
+  position: relative;
+  z-index: 1;
 }
 
 .step-icon svg {
   width: 100%;
   height: 100%;
   stroke-width: 1;
+  color: #94a3b8;
 }
 
 .step-label {
   font-weight: 500;
+  color: #94a3b8;
 }
 
 .step-content {
   margin-left: 28px;
+  color: #64748b;
 }
 
 .answer-content {
   margin-left: 0;
+  color: #333;
 }
 
 .step-item {
@@ -47,12 +79,19 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
-  color: #666;
+  color: #94a3b8;
   margin-bottom: 4px;
 }
 
 .item-content {
   line-height: 1.5;
+}
+
+.step-content .item-content {
+  color: #64748b;
+}
+
+.answer-content .item-content {
   color: #333;
 }
 
