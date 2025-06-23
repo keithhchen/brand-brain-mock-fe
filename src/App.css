@@ -211,15 +211,16 @@ body {
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: rgba(198, 198, 198, 0.15);
+  color: #333;
   border-bottom-right-radius: 8px;
+  /* border: 1px solid rgba(147, 132, 216, 0.3); */
 }
 
 .message.assistant .message-content {
-  background: rgba(247, 250, 252, 0.9);
   color: #2d3748;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  /* background: rgba(247, 250, 252, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8); */
   border-bottom-left-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -325,10 +326,10 @@ body {
 }
 
 .content-section {
-  background: #f9fafb;
+  /* background: #f9fafb; */
   border-radius: 8px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.8;
 }
 
 .content-section ul {
